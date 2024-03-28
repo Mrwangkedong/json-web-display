@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>JSON Formatter and Highlighter</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f7f7f7;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 80%;
+            margin: 20px auto;
+            flex: 1;
+        }
+
+        header {
+            background: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px; /* Added space between the header and content */
+        }
+
+        #jsonInput {
+            width: calc(100% - 20px);
+            height: 200px;
+            padding: 10px;
+            margin-bottom: 10px;
+            font-family: monospace;
+        }
+
+        #jsonOutput {
+            white-space: pre-wrap;
+            background-color: #fff;
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 40px; /* Space above the design by line */
+        }
+
+        button {
+            padding: 15px 30px;
+            font-size: 1rem;
+            margin-top: 10px;
+            cursor: pointer;
+        }
+
+        select {
+            padding: 10px;
+            margin-top: 10px;
+        }
+
+        footer {
+            text-align: center;
+            padding: 10px;
+            color: #888;
+            margin-top: auto; /* Push the footer to the bottom */
+        }
+
+        /* Color Scheme Styles */
+        .scheme1-key { color: #1e81b0; }
+        .scheme1-value { color: #e28743; }
+        .scheme2-key { color: #116530; }
+        .scheme2-value { color: #c2410c; }
+        .scheme3-key { color: #FFA500; }
+        .scheme3-value { color: #FF69B4; }
+
+        .jsonviewer .nested { /* Assuming .nested is the class used by your JSON viewer for nested elements */
+                padding-left: 20px; /* Increase left padding for each nested level */
+            }
+
+            .jsonviewer .nested .nested { /* Further nested elements */
+                padding-left: 40px; /* Increase left padding more for deeper nested levels */
+            }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>JSON Formatter and Highlighter</h1>
+    </header>
+
+    <div class="container">
+        <textarea id="jsonInput" placeholder="Paste your JSON here..."></textarea>
+        <button onclick="formatAndHighlight()">Format and Highlight</button>
+        <select id="colorScheme">
+            <option value="scheme1">Color Scheme 1</option>
+            <option value="scheme2">Color Scheme 2</option>
+            <option value="scheme3">Color Scheme 3</option>
+        </select>
+        <pre id="jsonOutput"></pre>
+    </div>
+
+    <footer>
+        design by wkd
+    </footer>
+
+    <script type="text/javascript" src="chnobean.jsonviewer.js"></script>
+    <script>    
+        "use strict";
+
+        function formatAndHighlight() {
+            const jsonInput = document.getElementById('jsonInput').value;
+            const jsonOutput = document.getElementById('jsonOutput');
+            const colorScheme = document.getElementById('colorScheme').value;
+
+            try {
+                let parsedJson = JSON.parse(jsonInput);
+                // Handle newline characters in strings
+                parsedJson = JSON.parse(JSON.stringify(parsedJson).replace(/\\n/g, "\\\\n"));
+                const jsonViewer = chnobean.jsonviewer.domify(parsedJson);
+                jsonOutput.innerHTML = ''; // Clear previous output
+                jsonOutput.appendChild(jsonViewer.rootElement);
+                applyHighlighting(jsonViewer.rootElement, colorScheme);
+            } catch (e) {
+                jsonOutput.innerText = 'Invalid JSON!';
+            }
+        }
+
+        function applyHighlighting(element, scheme) {
+            const keyElements = element.getElementsByClassName('key');
+            for (let key of keyElements) {
+                key.classList.add(`${scheme}-key`, 'json-key');
+            }
+            const valueElements = element.getElementsByClassName('string');
+            for (let value of valueElements) {
+                value.classList.add(`${scheme}-value`, 'json-value');
+            }
+            // Additional types can be added here if needed
+            // Apply indentation styles
+            const nestedElements = element.getElementsByClassName('nested');
+            for (let nested of nestedElements) {
+                nested.classList.add('jsonviewer-nested');
+            }
+        }
+
+        // Event listener for color scheme change
+        document.getElementById('colorScheme').addEventListener('change', function() {
+            const jsonOutput = document.getElementById('jsonOutput');
+            if (jsonOutput.firstChild) {
+                applyHighlighting(jsonOutput.firstChild, this.value);
+            }
+        });
+
+        // Insert the external JSON viewer script here
+        // ... (The entire JSON viewer code that you provided) ...
+    </script>
+    
+</body>
+</html>
